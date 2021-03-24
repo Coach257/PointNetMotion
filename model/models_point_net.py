@@ -99,6 +99,8 @@ def trans_regularizer(trans):
     example
 '''
 if __name__ == '__main__':
+    ## 关于input： 位置还是nvk
+    ## 关于首位拼接 cat还是直接拼接
     inputs = torch.rand([32, 3, 34]).cuda()
     cls_labels = torch.randint(10, [32]).cuda()
     reg_labels = torch.randn([32]).cuda()
