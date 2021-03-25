@@ -6,7 +6,7 @@ __all__ = ['PointNetfeat', 'PointNetCls', 'trans_regularizer']
 
 
 class STNkd(nn.Module):
-    def __init__(self, k=3, mode='init_identity'):
+    def __init__(self, k=14, mode='init_identity'):
         super().__init__()
         self.k = k
         self.mode = mode
