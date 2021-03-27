@@ -37,10 +37,13 @@ class MotionDataset(Dataset):
         assert data.shape[1] == 7
         assert data.shape[3] == 3
         rotations_info = np.zeros([3, self.point_num,len(self.joints),4])
+        max_len_n = data[0][0][-1][0]
         for time in range(self.point_num):
             for joint in range(len(self.joints)):
                 for i in range(3):
                     rotations_info[i][time][joint] = [x[time][i] for x in data[joint][:4]]
+        # normalize n 
+        rotations_info[0] = rotations_info[0]/max_len_n
         return torch.tensor(rotations_info,dtype = torch.double)
 
     '''
@@ -57,10 +60,13 @@ class MotionDataset(Dataset):
         assert data.shape[1] == 7
         assert data.shape[3] == 3
         positions_info = np.zeros([3,self.point_num,len(self.joints),3])
+        max_len_n = data[0][0][-1][0]
         for time in range(self.point_num):
             for joint in range(len(self.joints)):
                 for i in range(3):
                     positions_info[i][time][joint] = [x[time][i] for x in data[joint][-3:]]
+        # normalize n 
+        positions_info[0] = positions_info[0]/max_len_n
         return torch.tensor(positions_info, dtype = torch.double)
     
     def get_inputs(self, rotations_info, positions_info):
@@ -71,17 +77,23 @@ class MotionDataset(Dataset):
         inputs = torch.cat((inputs[0],inputs[-1]),dim=1)
         return inputs.t()
 
+
     def __getitem__(self, index):
         data = self.cache_scheduler.load(index)
         rotations_info = self.get_rotation_info(data["info"])
         positions_info = self.get_position_info(data["info"])
         inputs = self.get_inputs(rotations_info,positions_info)
-        return inputs
+        # joint_num * 7 * point_num * 3
+        targets = torch.tensor(data["info"],dtype = torch.double).view(-1)
+        return inputs,targets
         
+    def get_dim(self):
+        return len(self.joints) * 7 * self.point_num * 3
+
     def __len__(self):
         return len(self.data_files)
 
 if __name__ == '__main__':
     motiondataset = MotionDataset("data_example\data\\","data_example\joint_info.json",16)
-    x = motiondataset[0]
+    x,y = motiondataset[0]
     import ipdb;ipdb.set_trace()
