@@ -48,7 +48,7 @@ class PointNetfeat(nn.Module):
         self.mlp1 = nn.Sequential(
             nn.Conv1d(3, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU(),
             nn.Conv1d(64, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU())
-        self.feat_trans = STNkd(k=64, mode=cfg.mode)
+        # self.feat_trans = STNkd(k=64, mode=cfg.mode)
         self.mlp2 = nn.Sequential(
             nn.Conv1d(64, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU(),
             nn.Conv1d(64, 128, 1, bias=False), nn.BatchNorm1d(128), nn.ReLU(),
@@ -59,10 +59,10 @@ class PointNetfeat(nn.Module):
         trans_input_mtx = self.input_trans(x)
         x = torch.bmm(trans_input_mtx, x)
         x = self.mlp1(x)
-        trans_feat_mtx = self.feat_trans(x)
+        # trans_feat_mtx = self.feat_trans(x)
         x = torch.bmm(trans_feat_mtx, x)
         point_feat = self.mlp2(x)
-        return point_feat, trans_feat_mtx 
+        return point_feat
 
 
 class PointNetCls(nn.Module):
@@ -77,7 +77,7 @@ class PointNetCls(nn.Module):
 
     def forward(self, x):
         n_pts = x.shape[2]
-        x, trans_mtx = self.feat(x)
+        x = self.feat(x)
         x = F.max_pool1d(x, n_pts).squeeze(2)
         x = self.mlp(x)
         x = self.dropout(x)

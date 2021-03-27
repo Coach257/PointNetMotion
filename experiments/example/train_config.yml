@@ -1,0 +1,19 @@
+data:
+  data_path: "/home/data/Motion3D/CatGirl_SMPL_json_Results/CatGirl_SMPL_json/"
+  joint_file: "/home/data/Motion3D/motionjson/joint_info.json"
+
+train:
+  batch_size: 32
+  point_num: 16
+  inputtype: "position"
+  outputtype: "direct"
+  epoch: 600
+  optimizer:
+    type: "Adam"
+    lr: 0.001
+  disp_every: 50
+  save_path: "./checkpoints/"
+  log_dir: "./logs/"
+
+model: 
+  mode: "init_identity"
