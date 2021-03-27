@@ -25,7 +25,7 @@ class MotionDataset(Dataset):
 
 
     def normalize(self,data):
-        data = torch.tensor(data , dtype = torch.double)
+        data = torch.tensor(data , dtype = torch.float)
         max_len = data[0][0][-1][0]
         data[:][:][:] = data[:][:][:]/torch.tensor([max_len,1,1])
         return data
@@ -46,7 +46,7 @@ class MotionDataset(Dataset):
             for joint in range(len(self.joints)):
                 for i in range(3):
                     rotations_info[i][time][joint] = [x[time][i] for x in data[joint][:4]]
-        return torch.tensor(rotations_info,dtype = torch.double)
+        return torch.tensor(rotations_info,dtype = torch.float)
 
     '''
     Convert list: 
@@ -65,7 +65,7 @@ class MotionDataset(Dataset):
             for joint in range(len(self.joints)):
                 for i in range(3):
                     positions_info[i][time][joint] = [x[time][i] for x in data[joint][-3:]]
-        return torch.tensor(positions_info, dtype = torch.double)
+        return torch.tensor(positions_info, dtype = torch.float)
     
     def get_inputs(self, rotations_info, positions_info):
         if self.inputtype == "position":

@@ -5,7 +5,7 @@ from .motion_dataset import MotionDataset
 
 def build_dataloader(data_path, joint_file, batch_size, point_num, inputtype, outputtype):
     dataset = MotionDataset(data_path, joint_file, point_num, inputtype, outputtype)
-    return DataLoader(dataset, sampler=BatchSampler(sampler=SequentialSampler(dataset),batch_size = batch_size, drop_last = True))
+    return DataLoader(dataset, sampler=SequentialSampler(dataset),batch_size = batch_size, drop_last = True)
 
 
 if __name__ == "__main__":

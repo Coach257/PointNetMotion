@@ -44,11 +44,11 @@ class STNkd(nn.Module):
 class PointNetfeat(nn.Module):
     def __init__(self, cfg):
         super().__init__()
-        self.input_trans = STNkd(k=3, mode=cfg.mode)
+        self.input_trans = STNkd(k=14, mode=cfg.mode)
         self.mlp1 = nn.Sequential(
-            nn.Conv1d(3, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU(),
+            nn.Conv1d(14, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU(),
             nn.Conv1d(64, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU())
-        # self.feat_trans = STNkd(k=64, mode=cfg.mode)
+        self.feat_trans = STNkd(k=64, mode=cfg.mode)
         self.mlp2 = nn.Sequential(
             nn.Conv1d(64, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU(),
             nn.Conv1d(64, 128, 1, bias=False), nn.BatchNorm1d(128), nn.ReLU(),
@@ -59,10 +59,10 @@ class PointNetfeat(nn.Module):
         trans_input_mtx = self.input_trans(x)
         x = torch.bmm(trans_input_mtx, x)
         x = self.mlp1(x)
-        # trans_feat_mtx = self.feat_trans(x)
+        trans_feat_mtx = self.feat_trans(x)
         x = torch.bmm(trans_feat_mtx, x)
         point_feat = self.mlp2(x)
-        return point_feat
+        return point_feat,trans_feat_mtx
 
 
 class PointNetCls(nn.Module):
@@ -77,18 +77,18 @@ class PointNetCls(nn.Module):
 
     def forward(self, x):
         n_pts = x.shape[2]
-        x = self.feat(x)
+        x, trans_mtx= self.feat(x)
         x = F.max_pool1d(x, n_pts).squeeze(2)
         x = self.mlp(x)
         x = self.dropout(x)
         cls_pred = self.fc_cls(x)
-        return cls_pred
+        return cls_pred, trans_mtx
 
 
-def trans_regularizer(trans):
-    trans_square = torch.bmm(trans, trans.transpose(1, 2))
+def trans_regularizer(trans,device):
+    trans_square = torch.bmm(trans, trans.transpose(1, 2)).to(device)
     d = trans_square.shape[1]
-    identity = torch.eye(d).cuda().expand_as(trans_square)
+    identity = torch.eye(d).cuda().expand_as(trans_square).to(device)
     loss = F.mse_loss(trans_square, identity)
     return loss
 

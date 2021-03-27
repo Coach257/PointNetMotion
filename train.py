@@ -1,6 +1,7 @@
 import argparse
 import os 
 import time
+import torch
 from addict import Dict
 from torch.utils.tensorboard import SummaryWriter
 import yaml
@@ -8,6 +9,7 @@ import yaml
 from datasets.data_loader import build_dataloader
 from model.models_point_net import PointNetCls
 from utils.logger import Logger
+from model.models_point_net import trans_regularizer
 import torch.nn.functional as F
 
 def parse_args():
@@ -68,9 +70,12 @@ class Trainer(object):
             self.logger.logging("Start Epoch %d " %e)
             metric = 0.
             for input,target in data_loader:
-                input.to(device)
-                pred = model(input)
-                loss = F.cross_entropy(pred,target)
+                input = input.to(device)
+                target = target.to(device)
+                pred, trans_mtx = model(input)
+
+
+                loss = F.mse_loss(pred,target) + trans_regularizer(trans_mtx,device)*0.001
                 self.writer.add_scalar("loss", loss.item(), step)
                 losses += loss.item()
                 step += 1
