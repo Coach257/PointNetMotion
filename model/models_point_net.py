@@ -74,7 +74,6 @@ class PointNetCls(nn.Module):
             nn.Linear(512, 256, bias=False), nn.BatchNorm1d(256), nn.ReLU())
         self.dropout = nn.Dropout(p=0.3)
         self.fc_cls = nn.Linear(256, cfg.n_cls)
-        self.fc_reg = nn.Linear(256, cfg.n_cls)
 
     def forward(self, x):
         n_pts = x.shape[2]
@@ -83,8 +82,7 @@ class PointNetCls(nn.Module):
         x = self.mlp(x)
         x = self.dropout(x)
         cls_pred = self.fc_cls(x)
-        reg_pred = self.fc_reg(x)
-        return cls_pred, reg_pred, trans_mtx
+        return cls_pred
 
 
 def trans_regularizer(trans):
