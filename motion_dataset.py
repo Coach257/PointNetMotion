@@ -20,6 +20,8 @@ class MotionDataset(Dataset):
         print("The number of data files is %d" % len(self.data_files))
         self.cache_scheduler = CacheSchedule(data_path, self.data_files)
 
+        joint_info = json.load(open(joint_file))
+        self.joints = joint_info['joints']
 
     '''
     Convert list: 
@@ -28,7 +30,7 @@ class MotionDataset(Dataset):
     [n,v,k] * point_num * joint_num * [x,y,z,w]
     '''
     def get_rotation_info(self,data):
-        data = np.array(data)
+        data = np.array(data, dtype=np.float64)
         assert len(data.shape) == 4
         assert data.shape[2] == self.point_num
         assert data.shape[0] == len(self.joints)
@@ -48,7 +50,7 @@ class MotionDataset(Dataset):
     [n,v,k] * point_num * joint_num * [px,py,pz]
     '''
     def get_position_info(self,data):
-        data = np.array(data)
+        data = np.array(data, dtype=np.float64)
         assert len(data.shape) == 4
         assert data.shape[2] == self.point_num
         assert data.shape[0] == len(self.joints)
@@ -61,20 +63,20 @@ class MotionDataset(Dataset):
                     positions_info[i][time][joint] = [x[time][i] for x in data[joint][-3:]]
         return torch.tensor(positions_info, dtype = torch.double)
     
-    def get_inputs(self, local_rotations_v,local_rotations_k, global_pos):
+    def get_inputs(self, rotations_info, positions_info):
         if self.inputtype == "position":
-            inputs = torch.cat((local_rotations_v,global_pos),dim=2)
-            inputs = torch.cat((inputs[0],inputs[-1]),dim=1)
-            return inputs.t()
+            inputs = torch.cat((rotations_info[1],positions_info[1]), dim = 2)
         elif self.inputtype == "gradient":
-            pass
+            inputs = torch.cat((rotations_info[2],positions_info[2]), dim = 2)
+        inputs = torch.cat((inputs[0],inputs[-1]),dim=1)
+        return inputs.t()
 
     def __getitem__(self, index):
         data = self.cache_scheduler.load(index)
         rotations_info = self.get_rotation_info(data["info"])
         positions_info = self.get_position_info(data["info"])
-        #inputs = self.get_inputs(local_rotations_v,local_rotations_k, global_pos)
-        return positions_info
+        inputs = self.get_inputs(rotations_info,positions_info)
+        return inputs
         
     def __len__(self):
         return len(self.data_files)
