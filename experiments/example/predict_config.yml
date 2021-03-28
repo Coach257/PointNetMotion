@@ -1,0 +1,6 @@
+data:
+  data_path: "/home/data/Motion3D/CatGirl_SMPL_json_Results/CatGirl_SMPL_json/"
+  joint_file: "/home/data/Motion3D/motionjson/joint_info.json"
+model_path: "checkpoints/best.m"
+point_num: 16
+inputtype: "position"
