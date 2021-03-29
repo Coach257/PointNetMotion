@@ -8,6 +8,7 @@ import argparse
 from addict import Dict
 import yaml
 from model.models_point_net import PointNetCls
+from data_process.Rehermite import ReHermite
 
 random.seed(a=None, version=2)
 def parse_args():
@@ -112,6 +113,7 @@ def main():
     os.makedirs(save_path)
     json.dump(data,open(os.path.join(save_path,"origin.json"),"w"))
     json.dump({"name":data["name"],"info":pred},open(os.path.join(save_path,"out.json"),"w"))
+    ReHermite({"name":data["name"],"info":pred},os.path.join(save_path,"play.json"))
 
 if __name__ == "__main__":
     main()   
