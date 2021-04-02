@@ -71,7 +71,7 @@ class MotionDataset(Dataset):
         if self.inputtype == "position":
             inputs = torch.cat((rotations_info[1],positions_info[1]), dim = 2)
         elif self.inputtype == "gradient":
-            inputs = torch.cat((rotations_info[2],positions_info[2]), dim = 2)
+            inputs = torch.cat((rotations_info[1], rotations_info[2],positions_info[1],positions_info[2]), dim = 2)
         inputs = torch.cat((inputs[0],inputs[-1]),dim=1)
         return inputs.t()
 
@@ -81,7 +81,12 @@ class MotionDataset(Dataset):
                 for info in joint:
                     for time in range (1,self.point_num,1):
                         info[time][0] = info[time][0] - info[time-1][0]
-        return data.view(-1)
+        res = torch.zeros(len(self.joints),7,self.point_num-2,3)
+        for i in range(len(self.joints)):
+            for j in range(7):
+                for k in range(self.point_num-2):
+                    res[i][j][k] = data[i][j][k+1]
+        return res.view(-1)
 
 
     def __getitem__(self, index):
@@ -95,8 +100,14 @@ class MotionDataset(Dataset):
         return inputs, targets
         
     def get_dim(self):
-        return len(self.joints) * 7 * self.point_num * 3
+        return len(self.joints) * 7 * (self.point_num-2) * 3
 
+    def get_k(self):
+        if self.inputtype == "position":
+            return 14
+        elif self.inputtype == "gradient":
+            return 28
+            
     def __len__(self):
         return len(self.data_files)
 

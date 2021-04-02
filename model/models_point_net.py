@@ -44,9 +44,9 @@ class STNkd(nn.Module):
 class PointNetfeat(nn.Module):
     def __init__(self, cfg):
         super().__init__()
-        self.input_trans = STNkd(k=14, mode=cfg.mode)
+        self.input_trans = STNkd(k=cfg.k, mode=cfg.mode)
         self.mlp1 = nn.Sequential(
-            nn.Conv1d(14, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU(),
+            nn.Conv1d(cfg.k, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU(),
             nn.Conv1d(64, 64, 1, bias=False), nn.BatchNorm1d(64), nn.ReLU())
         self.feat_trans = STNkd(k=64, mode=cfg.mode)
         self.mlp2 = nn.Sequential(

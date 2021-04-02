@@ -35,6 +35,7 @@ class Trainer(object):
         data_loader = build_dataloader(cfg.data.data_path, cfg.data.joint_file, cfg.train.batch_size,cfg.train.point_num,cfg.train.inputtype,cfg.train.outputtype)
         dataset = data_loader.dataset
         cfg.model.n_cls = dataset.get_dim()
+        cfg.model.k = dataset.get_k()
 
         model = PointNetCls(cfg.model)
         model.to(device=device)

@@ -81,20 +81,35 @@ class Predictor(object):
         if self.inputtype == "position":
             inputs = torch.cat((rotations_info[1],positions_info[1]), dim = 2)
         elif self.inputtype == "gradient":
-            inputs = torch.cat((rotations_info[2],positions_info[2]), dim = 2)
+            inputs = torch.cat((rotations_info[1], rotations_info[2],positions_info[1],positions_info[2]), dim = 2)
         inputs = torch.cat((inputs[0],inputs[-1]),dim=1)
         return inputs.t()
     
+    def get_pred(self,data, pred):
+        res = torch.zeros(len(self.joints),7,self.point_num,3)
+        for i in range(len(self.joints)):
+            for j in range(7):
+                res[i][j][0] = data[i][j][0]
+                res[i][j][self.point_num-1] = data[i][j][self.point_num-1]
+                for k in range(self.point_num-2):
+                    res[i][j][k+1] = pred[i][j][k]
+        return res
+
     def predict(self,data):
         data = self.normalize(data)
         rotations_info = self.get_rotation_info(data)
         positions_info = self.get_position_info(data)
         inputs = self.get_inputs(rotations_info,positions_info)
-        inputs = inputs.view(1,14,len(self.joints))
+        if self.inputtype == "position":
+            inputs = inputs.view(1,14,len(self.joints))
+        elif self.inputtype == "gradient":
+            inputs = inputs.view(1,28,len(self.joints))
+
         pred,trans_mtx = self.model(inputs)
-        pred = pred.view(len(self.joints),7,self.point_num,3)
-        pred = self.unnormalize(pred)
-        return pred
+        pred = pred.view(len(self.joints),7,self.point_num-2,3)
+        res = self.get_pred(data,pred)
+        res = self.unnormalize(res)
+        return res
 
 def main():
     args = parse_args()
