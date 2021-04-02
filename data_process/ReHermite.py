@@ -11,7 +11,6 @@ def ReadOriginalData(JsonFile,axis,joint):
 
     global LocalGradients
     LocalGradients = []
-
     for i in range(0,16):
         ControlPoints.append([round(JsonFile["info"][joint][axis][i][0]),JsonFile["info"][joint][axis][i][1]])
         LocalGradients.append(JsonFile["info"][joint][axis][i][2])
@@ -79,5 +78,5 @@ def ReHermite(JsonFile,out_path):
 
 
 if __name__ == "__main__":
-    jsonfile = json.load(open("/home/shizhelun/PointNetMotion/PointNetMotion/experiments/example/20210304/stand-right_bow_step_Strike_07.json/origin.json"))
-    ReHermite(jsonfile,"/home/shizhelun/PointNetMotion/PointNetMotion/experiments/example/20210304/stand-right_bow_step_Strike_07.json/out.json")
+    jsonfile = json.load(open("/home/shizhelun/PointNetMotion/PointNetMotion/experiments/trainning_0330/20210201/front_bow_step-quadruped_locomotion/000_front_bow_step-quadruped_locomotion_06.json/out.json"))
+    ReHermite(jsonfile,"/home/shizhelun/PointNetMotion/PointNetMotion/experiments/trainning_0330/20210201/front_bow_step-quadruped_locomotion/000_front_bow_step-quadruped_locomotion_06.json/play.json")
